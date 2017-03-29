@@ -39,12 +39,19 @@ public class MainApp {
 //        for (int i=0;i<list.size();i++){
 //            System.out.println(list.get(i));
 //        }
-        MysqlAPI mysqlAPI=new MysqlAPI();
-        int count=mysqlAPI.queryCount("queryCount",null);
-        JSONArray json1=mysqlAPI.queryMore("queryCount",null);
+        MysqlAPI mysqlAPI=new MysqlAPI("url","user","password");
+//        mysqlAPI.InsertData("insert",null);
+        JSONObject jsonArray2 = mysqlAPI.queryOne("query",null);
+        System.out.println(jsonArray2);
+        int count=mysqlAPI.queryCount("ERjoin",null);
+        JSONArray json1=mysqlAPI.queryMore("ERjoin",null);
         System.out.println(count);
         for (int i=0;i<json1.size();i++){
             System.out.println(json1.get(i));
+        }
+        JSONArray json2=mysqlAPI.queryMore("ShareJoin",null);
+        for (int i=0;i<json2.size();i++){
+            System.out.println(json2.get(i));
         }
         mysqlAPI.close();
     }

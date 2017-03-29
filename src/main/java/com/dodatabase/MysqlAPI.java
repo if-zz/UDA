@@ -5,11 +5,9 @@ package com.dodatabase;
  */
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.sql.*;
+import java.sql.Date;
+import java.util.*;
 
 //import org.apache.taglibs.standard.lang.jstl.test.beans.PublicInterface2;
 
@@ -17,6 +15,7 @@ import java.util.Properties;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import net.sf.json.JsonConfig;
 
 public class MysqlAPI {
 
@@ -28,10 +27,10 @@ public class MysqlAPI {
      *
      * @throws IOException
      */
-    public MysqlAPI() throws IOException {
+    public MysqlAPI(String urlKey,String userKey,String passKey) throws IOException {
         prs = new Properties();
         InputStream inputStream = MysqlAPI.class.getResourceAsStream("/sql.properties");
-        mysql = Mysql.getInstance();
+        mysql = Mysql.getInstance(urlKey,userKey,passKey);
         prs.load(inputStream);
         inputStream.close();
 
@@ -138,9 +137,13 @@ public class MysqlAPI {
         JSONObject json = null;
         String sql = prs.getProperty(sqlKey);
         Map<String, Object> map = new HashMap<String, Object>();
+        JsonConfig config = new JsonConfig();
+
+        config.registerJsonValueProcessor(Date.class,
+                new DateJsonValueProcessor("yyyy-MM-dd"));
         try {
             map = mysql.queryOne(sql, params);
-            json = JSONObject.fromObject(map);
+            json = JSONObject.fromObject(map,config);
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -160,15 +163,22 @@ public class MysqlAPI {
     public JSONArray queryMore(String sqlKey, List<Object> params) {
         JSONArray json = null;
         String sql = prs.getProperty(sqlKey);
+        JsonConfig config = new JsonConfig();
+
+        config.registerJsonValueProcessor(Date.class,
+                new DateJsonValueProcessor("yyyy-MM-dd"));
+
         try {
             List<Map<String, Object>> list = mysql.queryMore(sql, params);
-            json = JSONArray.fromObject(list);
+            json = JSONArray.fromObject(list,config);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return json;
     }
-
+    /**
+     断开当前连接
+     */
     public String close(){
         String error=null;
         try {

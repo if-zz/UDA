@@ -19,16 +19,48 @@ import static sun.misc.Version.print;
 public class Mysql {
 
     private static volatile Mysql instance = null;
-    public static final String url ;
-    public static final String driver;
-    public static final String user ;
+    public static  String url ;
+    public static  String driver;
+    public static  String user ;
 //    public String db = "complaint";
-    public static final String password ;
+    public static  String password ;
     public Connection connection = null;
     public PreparedStatement pstmt = null;
     public ResultSet resultSet = null;
 
-    static{
+//    static{
+//        try {
+//            //1.获得字节码对象
+//            Class clazz = Mysql.class;
+//
+//            //2.调用getResourceAsStream获取路径
+//            InputStream inputStream = clazz.getResourceAsStream("/mysql.properties");
+//            Properties pro = new Properties();
+//            pro.load(inputStream);
+//
+//            //3.读取参数
+//            url=pro.getProperty("url");
+//            password=pro.getProperty("password");
+//            user=pro.getProperty("user");
+//            driver=pro.getProperty("driverClass");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            System.out.println("注册失败！" + e.getMessage());
+//            throw new RuntimeException(e);
+//        }
+//    }
+    public static Mysql getInstance(String urlKey,String userKey,String passKey) {
+        if (instance == null) {
+            synchronized (Mysql.class) {
+                if (instance == null) {
+                    instance = new Mysql(urlKey,userKey,passKey);
+                }
+            }
+        }
+        return instance;
+    }
+
+    public Mysql(String urlKey,String userKey,String passKey) {
         try {
             //1.获得字节码对象
             Class clazz = Mysql.class;
@@ -39,29 +71,10 @@ public class Mysql {
             pro.load(inputStream);
 
             //3.读取参数
-            url=pro.getProperty("url");
-            password=pro.getProperty("password");
-            user=pro.getProperty("user");
+            url=pro.getProperty(urlKey);
+            password=pro.getProperty(passKey);
+            user=pro.getProperty(userKey);
             driver=pro.getProperty("driverClass");
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("注册失败！" + e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }
-    public static Mysql getInstance() {
-        if (instance == null) {
-            synchronized (Mysql.class) {
-                if (instance == null) {
-                    instance = new Mysql();
-                }
-            }
-        }
-        return instance;
-    }
-
-    public Mysql() {
-        try {
             // 指定连接类型
             Class.forName(driver);
             // 获取连接
@@ -160,7 +173,7 @@ public class Mysql {
         while (resultSet.next()) {
             Map<String, Object> map = new HashMap<String, Object>();
             for (int i = 0; i < cols_len; i++) {
-                String cols_name = metaData.getColumnName(i + 1);
+                String cols_name = metaData.getColumnName(i+1);
                 Object cols_value = resultSet.getObject(cols_name);
                 if (cols_value == null) {
                     cols_value = "";
